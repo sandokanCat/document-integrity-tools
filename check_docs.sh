@@ -12,7 +12,7 @@ YELLOW="\033[1;33m"
 NC="\033[0m"
 
 # ===== Directories =====
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+REPO_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 
 CHECK_DIR="$REPO_ROOT/doc"
 
