@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # ⏱ VERIFIED DOCUMENTS CHECKER
 # Script to verify PGP, SHA-512 hashes, TSA timestamp and FNMT PAdES signatures
 # Intended for Linux/macOS/WSL. Windows users should use WSL or PowerShell equivalent.
@@ -39,8 +40,8 @@ resolve_path() {
         exit 1
     fi
 
-    print_step "\n${YELLOW}RESOLVED PATH:"
-    echo -e "${GREEN}[OK]$CHECK_DIR${NC}"
+    print_step "Resolved path"
+    echo -e "${GREEN}[OK] $CHECK_DIR${NC}"
 }
 
 check_file_mandatory() {
@@ -77,7 +78,7 @@ TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
 print_step "Importing public PGP key"
 if check_file_mandatory "$PUB_KEY"; then
     gpg --import $PUB_KEY >/dev/null 2>&1 || true
-    echo -e "${GREEN}[OK] '$PUB_KEY'${NC}"
+    echo -e "${GREEN}[OK] $PUB_KEY${NC}"
 fi
 
 # ===== 1. Verify global PGP signature of manifest =====
