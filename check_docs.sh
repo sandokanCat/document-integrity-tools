@@ -12,13 +12,14 @@ YELLOW="\033[1;33m"
 NC="\033[0m"
 
 # ===== Files & directories =====
-PUB_KEY="publickey.asc"
-HASH_FILE="SHA512SUMS"
-HASH_SIG="SHA512SUMS.asc"
-TSA_FILE="SHA512SUMS.tsr"
-TSA_CERT="fnmt-tsa.pem" # Optional
-PDF_DIR="pdf_signed"
-PGP_DIR="pgp_asc"
+CHECK_DIR="/doc"
+PUB_KEY="$CHECK_DIR/publickey.asc"
+HASH_FILE="$CHECK_DIR/SHA512SUMS"
+HASH_SIG="$CHECK_DIR/SHA512SUMS.asc"
+TSA_FILE="$CHECK_DIR/SHA512SUMS.tsr"
+TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
+PDF_DIR="$CHECK_DIR/pdf_signed"
+PGP_DIR="$CHECK_DIR/pgp_asc"
 
 # ===== Flags =====
 FAILED=0
