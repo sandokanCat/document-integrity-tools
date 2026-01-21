@@ -11,15 +11,20 @@ RED="\033[0;31m"
 YELLOW="\033[1;33m"
 NC="\033[0m"
 
-# ===== Files & directories =====
-CHECK_DIR="/doc"
+# ===== Directories =====
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+CHECK_DIR="$REPO_ROOT/doc"
+
+PDF_DIR="$CHECK_DIR/pdf_signed"
+PGP_DIR="$CHECK_DIR/pgp_asc"
+
+# ===== Files =====
 PUB_KEY="$CHECK_DIR/publickey.asc"
 HASH_FILE="$CHECK_DIR/SHA512SUMS"
 HASH_SIG="$CHECK_DIR/SHA512SUMS.asc"
 TSA_FILE="$CHECK_DIR/SHA512SUMS.tsr"
 TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
-PDF_DIR="$CHECK_DIR/pdf_signed"
-PGP_DIR="$CHECK_DIR/pgp_asc"
 
 # ===== Flags =====
 FAILED=0
