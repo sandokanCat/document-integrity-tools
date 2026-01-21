@@ -11,28 +11,36 @@ RED="\033[0;31m"
 YELLOW="\033[1;33m"
 NC="\033[0m"
 
-# ===== Directories =====
-REPO_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
-
-CHECK_DIR="$REPO_ROOT/doc"
-
-PDF_DIR="$CHECK_DIR/pdf_signed"
-PGP_DIR="$CHECK_DIR/pgp_asc"
-
-# ===== Files =====
-PUB_KEY="$CHECK_DIR/publickey.asc"
-HASH_FILE="$CHECK_DIR/SHA512SUMS"
-HASH_SIG="$CHECK_DIR/SHA512SUMS.asc"
-TSA_FILE="$CHECK_DIR/SHA512SUMS.tsr"
-TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
-
-# ===== Flags =====
+# ===== Initial variables =====
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CHECK_DIR=""
+CURRENT="$SCRIPT_DIR"
 FAILED=0
 
 # ===== Functions =====
 
 print_step() {
     echo -e "\n${YELLOW}=== $1 ===${NC}"
+}
+
+resolve_path() {
+    for i in {1..5}; do
+        if [[ -d "$CURRENT/doc" ]]; then
+            CHECK_DIR="$CURRENT/doc"
+            break
+        fi
+        CURRENT="$CURRENT/.."
+    done
+
+    if [[ -n "$CHECK_DIR" ]]; then
+        CHECK_DIR="$(cd "$CHECK_DIR" && pwd)"
+    else
+        echo -e "${RED}[ERROR] Could not locate doc folder in repo hierarchy${NC}"
+        exit 1
+    fi
+
+    print_step "\n${YELLOW}RESOLVED PATH:"
+    echo -e "${GREEN}[OK]$CHECK_DIR${NC}"
 }
 
 check_file_mandatory() {
@@ -52,6 +60,18 @@ check_file_optional() {
     fi
     return 0
 }
+
+# ===== Resolve CHECK_DIR =====
+resolve_path
+
+# ===== Paths dependent on CHECK_DIR =====
+PDF_DIR="$CHECK_DIR/pdf_signed"
+PGP_DIR="$CHECK_DIR/pgp_asc"
+PUB_KEY="$CHECK_DIR/publickey.asc"
+HASH_FILE="$CHECK_DIR/SHA512SUMS"
+HASH_SIG="$CHECK_DIR/SHA512SUMS.asc"
+TSA_FILE="$CHECK_DIR/SHA512SUMS.tsr"
+TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
 
 # ===== 0. Import public PGP key =====
 print_step "Importing public PGP key"
