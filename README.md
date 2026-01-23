@@ -1,6 +1,6 @@
 # Steps
 
-## *UNFINISHED DOCUMENT*
+## *UNFINISHED PROJECT*
 
 1. Debian / Ubuntu
 
