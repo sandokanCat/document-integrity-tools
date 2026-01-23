@@ -1,168 +1,179 @@
 #!/usr/bin/env bash
 
-# ⏱ VERIFIED DOCUMENTS CHECKER
-# Script to verify PGP, SHA-512 hashes, TSA timestamp and FNMT PAdES signatures
-# Intended for Linux/macOS/WSL. Windows users should use WSL or PowerShell equivalent.
+#
+# check_docs.sh – VERIFIED DOCUMENTS CHECKER
+#
+# Author:  © 2026 sandokan.cat – https://sandokan.cat
+# License: MIT – https://opensource.org/licenses/MIT
+# Version: 1.3.0
+# Date:    2026-01-23
+#
+# Description:
+# Verifies PGP signatures, SHA-512 hashes, TSA timestamps,
+# and FNMT PAdES signatures across a document repository.
+#
+# Supported on Linux, macOS and WSL.
+#
 
 set -euo pipefail
 
-# ===== Colors for output =====
+# === OUTPUT COLORS ===
 GREEN="\033[0;32m"
-RED="\033[0;31m"
 YELLOW="\033[1;33m"
+RED="\033[0;31m"
+CYAN="\033[0;36m"
 NC="\033[0m"
 
-# ===== Initial variables =====
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# === GLOBAL STATE ===
 CHECK_DIR=""
-CURRENT="$SCRIPT_DIR"
 FAILED=0
 
-# ===== Functions =====
+# === UTILITIES ===
 
 print_step() {
-    echo -e "\n${YELLOW}=== $1 ===${NC}"
+    printf "\n=== %s ===\n" "$1"
 }
 
-resolve_path() {
-    for i in {1..5}; do
-        if [[ -d "$CURRENT/doc" ]]; then
-            CHECK_DIR="$CURRENT/doc"
-            break
-        fi
-        CURRENT="$CURRENT/.."
-    done
+error_exit() {
+    printf "%b[ERROR]%b %s\n" "$RED" "$NC" "$1"
+    exit 1
+}
 
-    if [[ -n "$CHECK_DIR" ]]; then
-        CHECK_DIR="$(cd "$CHECK_DIR" && pwd)"
-    else
-        echo -e "${RED}[ERROR] Could not locate doc folder in repo hierarchy${NC}"
-        exit 1
-    fi
+usage() {
+    printf "Usage: %s -i INPUT_DIR\n" "$(basename "$0")"
+    printf "  -i, --input   Root 'doc' directory to verify\n"
+    exit 0
+}
 
-    print_step "Resolved path"
-    echo -e "${GREEN}[OK] $CHECK_DIR${NC}"
+relpath() {
+    realpath --relative-to="$CHECK_DIR" "$1"
 }
 
 check_file_mandatory() {
-    local file="$1"
-    if [[ ! -f "$file" ]]; then
-        FAILED=$((FAILED+1))
-        echo -e "${RED}[ERROR] File not found: $file${NC}"
-        exit 1
-    fi
+    [[ -f "$1" ]] || error_exit "File not found: $(printf "%b%s%b" "$CYAN" "$(relpath "$1")" "$NC")"
 }
 
 check_file_optional() {
-    local file="$1"
-    if [[ ! -f "$file" ]]; then
-        echo -e "${RED}[SKIPPED] Optional file not found: $file${NC}"
-        return 1
-    fi
-    return 0
+    [[ -f "$1" ]]
 }
 
-# ===== Resolve CHECK_DIR =====
-resolve_path
+# === ARGUMENT PARSING ===
+if [[ $# -eq 0 ]]; then
+    usage
+fi
 
-# ===== Paths dependent on CHECK_DIR =====
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -i|--input)
+            CHECK_DIR="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            error_exit "Unknown argument: $1"
+            ;;
+    esac
+done
+
+# === INITIAL SETUP ===
+[[ -n "$CHECK_DIR" ]] || error_exit "Input directory is required"
+[[ -d "$CHECK_DIR" ]] || error_exit "Input directory not found: $(printf "%b%s%b" "$CYAN" "$CHECK_DIR" "$NC")"
+CHECK_DIR="$(cd "$CHECK_DIR" && pwd)"
+
 PDF_DIR="$CHECK_DIR/pdf_signed"
 PGP_DIR="$CHECK_DIR/pgp_asc"
 PUB_KEY="$CHECK_DIR/publickey.asc"
 HASH_FILE="$CHECK_DIR/SHA512SUMS"
 HASH_SIG="$CHECK_DIR/SHA512SUMS.asc"
 TSA_FILE="$CHECK_DIR/SHA512SUMS.tsr"
-TSA_CERT="$CHECK_DIR/fnmt-tsa.pem" # Optional
+TSA_CERT="$CHECK_DIR/fnmt-tsa.pem"
 
-# ===== 0. Import public PGP key =====
+# === 0. IMPORT PGP KEY ===
 print_step "Importing public PGP key"
-if check_file_mandatory "$PUB_KEY"; then
-    gpg --import $PUB_KEY >/dev/null 2>&1 || true
-    echo -e "${GREEN}[OK] $PUB_KEY${NC}"
-fi
+check_file_mandatory "$PUB_KEY"
+gpg --import "$PUB_KEY" >/dev/null 2>&1 || true
+printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$PUB_KEY")" "$NC"
 
-# ===== 1. Verify global PGP signature of manifest =====
+# === 1. VERIFY MANIFEST SIGNATURE ===
 print_step "Verifying manifest PGP signature"
-if check_file_mandatory "$HASH_SIG"; then
-    if gpg --verify "$HASH_SIG" "$HASH_FILE" >/dev/null 2>&1; then
-        echo -e "${GREEN}[OK] '$HASH_SIG' for '$HASH_FILE'${NC}"
-    else
-        FAILED=$((FAILED+1))
-        echo -e "${RED}[FAILED] '$HASH_SIG' for '$HASH_FILE'${NC}"
-    fi
+check_file_mandatory "$HASH_SIG"
+
+if gpg --verify "$HASH_SIG" "$HASH_FILE" >/dev/null 2>&1; then
+    printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
+else
+    FAILED=$((FAILED + 1))
+    printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
 fi
 
-# ===== 1b. Optional TSA verification =====
+# === 1b. TSA VERIFICATION (OPTIONAL) ===
 print_step "Verifying TSA timestamp (optional)"
 if check_file_optional "$TSA_FILE" && check_file_optional "$TSA_CERT"; then
     if openssl ts -verify -in "$TSA_FILE" -data "$HASH_FILE" -CAfile "$TSA_CERT" >/dev/null 2>&1; then
-        echo -e "${GREEN}[OK] '$TSA_CERT' for '$TSA_FILE'${NC}"
+        printf "%b[OK] TSA verified%b\n" "$GREEN" "$NC"
     else
-        FAILED=$((FAILED+1))
-        echo -e "${RED}[FAILED] '$TSA_CERT' for '$TSA_FILE'${NC}"
+        FAILED=$((FAILED + 1))
+        printf "%b[FAILED] TSA verification failed%b\n" "$RED" "$NC"
     fi
 else
-    echo "Skipping TSA verification"
+    printf "%b[SKIPPED] TSA files not found%b\n" "$YELLOW" "$NC"
 fi
 
-# ===== 2. Verify SHA-512 hashes =====
-print_step "Verifying SHA-512 hashes on all files"
-if check_file_mandatory "$HASH_FILE"; then
-    while read -r line; do
-        file=$(echo "$line" | awk '{print $2}')
-        target=""
-        if [ -f "$PDF_DIR/$file" ]; then
-            target="$PDF_DIR/$file"
-        elif [ -f "$PGP_DIR/$file" ]; then
-            target="$PGP_DIR/$file"
-        else
-            FAILED=$((FAILED+1))
-            echo -e "${RED}[ERROR] File not found: $file${NC}"
-            continue
-        fi
+# === 2. VERIFY SHA-512 HASHES ===
+print_step "Verifying SHA-512 hashes"
+check_file_mandatory "$HASH_FILE"
 
-        result=$(LANG=C sha512sum -c <(echo "$line" | sed "s|$file|$target|") 2>&1)
-        status=$(echo "$result" | grep -o "OK\|FAILED")
+while read -r hash file; do
+    target=""
+    [[ -f "$PDF_DIR/$file" ]] && target="$PDF_DIR/$file"
+    [[ -f "$PGP_DIR/$file" ]] && target="$PGP_DIR/$file"
 
-        if [ "$status" == "OK" ]; then
-            echo -e "${GREEN}[OK] $file${NC}"
-        else
-            FAILED=$((FAILED+1))
-            echo -e "${RED}[FAILED] $file${NC}"
-        fi
-    done < "$HASH_FILE"
-fi
+    if [[ -z "$target" ]]; then
+        FAILED=$((FAILED + 1))
+        printf "%b[ERROR]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$file" "$NC"
+        continue
+    fi
 
-# ===== 3. Verify PGP signatures on documents =====
-print_step "Verifying PGP signatures on documents"
+    if printf "%s  %s\n" "$hash" "$target" | sha512sum -c --quiet; then
+        printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$file" "$NC"
+    else
+        FAILED=$((FAILED + 1))
+        printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$file" "$NC"
+    fi
+done < "$HASH_FILE"
+
+# === 3. VERIFY DOCUMENT PGP SIGNATURES ===
+print_step "Verifying document PGP signatures"
+
 if [[ -d "$PGP_DIR" && -d "$PDF_DIR" ]]; then
     for asc in "$PGP_DIR"/*.asc; do
         pdf="$PDF_DIR/$(basename "$asc" .asc)"
-        
-        if [ ! -f "$pdf" ]; then
-            echo -e "${RED}[ERROR] '$pdf' missing for '$asc', skipping${NC}"
+
+        if [[ ! -f "$pdf" ]]; then
+            FAILED=$((FAILED + 1))
+            printf "%b[ERROR]%b Missing %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
             continue
         fi
 
         if gpg --verify "$asc" "$pdf" >/dev/null 2>&1; then
-            echo -e "${GREEN}[OK] '$asc' for '$pdf'${NC}"
+            printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
         else
-            FAILED=$((FAILED+1))
-            echo -e "${RED}[FAILED] '$asc' for '$pdf'${NC}"
+            FAILED=$((FAILED + 1))
+            printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
         fi
     done
 else
-    FAILED=$((FAILED+1))
-    echo -e "${RED}[ERROR] '$PGP_DIR' or '$PDF_DIR' directories missing. Skipping document PGP verification.${NC}"
+    error_exit "PGP or PDF directories missing"
 fi
 
-# ===== Summary =====
+# === SUMMARY ===
 print_step "Summary"
-if [ $FAILED -eq 0 ]; then
-    echo -e "${GREEN}[SUCCESS] All checks completed successfully.${NC}"
+if [[ $FAILED -eq 0 ]]; then
+    printf "%b[SUCCESS] All checks passed%b\n" "$GREEN" "$NC"
 else
-    echo -e "${RED}[WARNING] $FAILED checks failed. Please review above.${NC}"
+    printf "%b[WARNING] %d checks failed%b\n" "$YELLOW" "$NC" "$FAILED"
 fi
 
 print_step "Reminder"
-echo "FNMT PAdES signatures must be verified visually in a PDF reader."
+printf "%bFNMT PAdES signatures must be verified visually in a PDF reader.%b\n\n" "$NC" "$NC"
