@@ -94,27 +94,27 @@ TSA_CERT="$CHECK_DIR/fnmt-tsa.pem"
 print_step "Importing public PGP key"
 check_file_mandatory "$PUB_KEY"
 gpg --import "$PUB_KEY" >/dev/null 2>&1 || true
-printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$PUB_KEY")" "$NC"
+printf "%b[IMPORTED]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$PUB_KEY")" "$NC"
 
 # === 1. VERIFY MANIFEST SIGNATURE ===
 print_step "Verifying manifest PGP signature"
 check_file_mandatory "$HASH_SIG"
 
 if gpg --verify "$HASH_SIG" "$HASH_FILE" >/dev/null 2>&1; then
-    printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
+    printf "%b[VERIFIED]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
 else
     FAILED=$((FAILED + 1))
-    printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
+    printf "%b[FAIL]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$HASH_SIG")" "$NC"
 fi
 
 # === 1b. TSA VERIFICATION (OPTIONAL) ===
 print_step "Verifying TSA timestamp (optional)"
 if check_file_optional "$TSA_FILE" && check_file_optional "$TSA_CERT"; then
     if openssl ts -verify -in "$TSA_FILE" -data "$HASH_FILE" -CAfile "$TSA_CERT" >/dev/null 2>&1; then
-        printf "%b[OK] TSA verified%b\n" "$GREEN" "$NC"
+        printf "%b[VERIFIED] TSA timestamp%b\n" "$GREEN" "$NC"
     else
         FAILED=$((FAILED + 1))
-        printf "%b[FAILED] TSA verification failed%b\n" "$RED" "$NC"
+        printf "%b[FAIL] TSA verification failed%b\n" "$RED" "$NC"
     fi
 else
     printf "%b[SKIPPED] TSA files not found%b\n" "$YELLOW" "$NC"
@@ -126,8 +126,14 @@ check_file_mandatory "$HASH_FILE"
 
 while read -r hash file; do
     target=""
-    [[ -f "$PDF_DIR/$file" ]] && target="$PDF_DIR/$file"
-    [[ -f "$PGP_DIR/$file" ]] && target="$PGP_DIR/$file"
+    # First, try file relative to CHECK_DIR (standard behavior)
+    [[ -f "$CHECK_DIR/$file" ]] && target="$CHECK_DIR/$file"
+    
+    # Fallback/Legacy: Check in specific dirs if not found and file has no path info
+    if [[ -z "$target" ]]; then
+        [[ -f "$PDF_DIR/$file" ]] && target="$PDF_DIR/$file"
+        [[ -f "$PGP_DIR/$file" ]] && target="$PGP_DIR/$file"
+    fi
 
     if [[ -z "$target" ]]; then
         FAILED=$((FAILED + 1))
@@ -136,10 +142,10 @@ while read -r hash file; do
     fi
 
     if printf "%s  %s\n" "$hash" "$target" | sha512sum -c --quiet; then
-        printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$file" "$NC"
+        printf "%b[VERIFIED]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$file" "$NC"
     else
         FAILED=$((FAILED + 1))
-        printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$file" "$NC"
+        printf "%b[FAIL]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$file" "$NC"
     fi
 done < "$HASH_FILE"
 
@@ -157,10 +163,10 @@ if [[ -d "$PGP_DIR" && -d "$PDF_DIR" ]]; then
         fi
 
         if gpg --verify "$asc" "$pdf" >/dev/null 2>&1; then
-            printf "%b[OK]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
+            printf "%b[VERIFIED]%b %b%s%b\n" "$GREEN" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
         else
             FAILED=$((FAILED + 1))
-            printf "%b[FAILED]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
+            printf "%b[FAIL]%b %b%s%b\n" "$RED" "$NC" "$CYAN" "$(relpath "$pdf")" "$NC"
         fi
     done
 else
@@ -170,9 +176,9 @@ fi
 # === SUMMARY ===
 print_step "Summary"
 if [[ $FAILED -eq 0 ]]; then
-    printf "%b[SUCCESS] All checks passed%b\n" "$GREEN" "$NC"
+    printf "%b[DONE] All checks passed%b\n" "$GREEN" "$NC"
 else
-    printf "%b[WARNING] %d checks failed%b\n" "$YELLOW" "$NC" "$FAILED"
+    printf "%b[WARN] %d checks failed%b\n" "$YELLOW" "$FAILED" "$NC"
 fi
 
 print_step "Reminder"

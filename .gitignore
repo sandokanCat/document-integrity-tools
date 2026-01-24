@@ -1,0 +1,35 @@
+# Environment
+venv/
+__pycache__/
+*.pyc
+
+# Output Directories
+redacted_output/
+final_docs/
+*output/
+
+# Testing
+doc/
+
+# Sensitive / Security
+*.key
+*.gpg
+*.pgp
+*.asc
+secring.gpg
+!SHA512SUMS.asc
+# We keep SHA512SUMS.asc inside final_docs/ but better safe than sorry in root
+# Actually, we WANT distributed .asc files in the output folders, but NOT private keys
+# Private keys usually are not .asc (public are), but let's be specific about secrets:
+private-key.asc
+secret.gpg
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

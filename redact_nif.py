@@ -161,7 +161,7 @@ def main(input_dir: Path, output_dir: Path | None = None) -> None:
 
     pdfs = list(input_dir.rglob("*.pdf"))
     if not pdfs:
-        print(f"{YELLOW}[WARNING] No PDFs found in {input_dir}{NC}")
+        print(f"{YELLOW}[WARN] No PDFs found in {input_dir}{NC}")
         return
 
     execution_log = {
@@ -184,9 +184,12 @@ def main(input_dir: Path, output_dir: Path | None = None) -> None:
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(execution_log, ensure_ascii=False) + "\n")
 
-    print_step("Finished")
-    print(f"{GREEN}[DONE]{total_files} files processed in: {CYAN}{output_dir}{NC}\n"
-          f"[LOG] Appended at: {CYAN}{log_file}{NC}\n")
+    print_step("Summary")
+    print(f"{GREEN}[DONE] {total_files} files processed in: {CYAN}{output_dir}{NC}\n"
+          f"[LOG] Appended at: {CYAN}{log_file}{NC}")
+
+    print_step("Reminder")
+    print(f"You can sign this output using {CYAN}sign_docs.sh{NC}\n")
 
 
 if __name__ == "__main__":
