@@ -10,9 +10,11 @@ date-released: 2026-01-24
 url: "https://github.com/sandokan/document-integrity-tools"
 license: MIT
 keywords:
-  - integrity
-  - privacy
-  - gdpr
-  - nif
   - pdf
-  - cryptography
+  - python3
+  - bash
+  - pades
+  - pgp-signature
+  - hash
+  - tsa
+  - mit-license
