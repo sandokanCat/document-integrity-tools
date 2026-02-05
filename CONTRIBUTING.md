@@ -4,7 +4,7 @@
 
 ## Filosofía y Código de Conducta
 
-Este proyecto se rige por un **Código de Conducta basado en la Meritocracia y la Excelencia Técnica**. Antes de contribuir, por favor léelo. Valoramos tu código, no tu identidad.
+Este proyecto se rige por un [Código de Conducta](./CODE_OF_CONDUCT.md) basado en la **Meritocracia y la Excelencia Técnica**. Antes de contribuir, por favor léelo. Valoramos tu código, no tu identidad.
 
 ## Pasos para contribuir
 
@@ -33,7 +33,7 @@ Thank you for your interest in contributing to `document-integrity-tools`! 🎉
 
 ## Philosophy & Code of Conduct
 
-This project is governed by a **Code of Conduct based on Meritocracy and Technical Excellence**. Please read it before contributing. We value your code, not your identity.
+This project is governed by a [Code of Conduct](./CODE_OF_CONDUCT.md) based on **Meritocracy and Technical Excellence**. Please read it before contributing. We value your code, not your identity.
 
 ## Steps to convert
 

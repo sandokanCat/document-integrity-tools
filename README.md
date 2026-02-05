@@ -110,6 +110,34 @@ Este conjunto de herramientas está diseñado para proporcionar garantías técn
 
 ---
 
+## 🤝 Contribuciones
+
+[¡Las contribuciones son bienvenidas!](./CONTRIBUTING.md)
+Mantén el código **modular, legible y testeado**.
+Los *pull requests* deben incluir una descripción clara y un ejemplo de funcionamiento.
+
+---
+
+## 📝 Licencia
+
+MIT © 2026 [sandokan.cat](https://sandokan.cat)
+
+> *Úsalo. Modifícalo. Compártelo. Se agradece la atribución.*
+
+<div align="center">
+    <a href="./LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-green" alt="Licencia MIT">
+    </a>
+</div>
+
+---
+
+## ⚠️ Descargo de Responsabilidad
+
+Todas las herramientas y utilidades de este repositorio se proporcionan "tal cual", sin garantías. Úsalas bajo tu propia responsabilidad. Pensado para uso **personal**, **educativo** y **profesional**.
+
+---
+
 <details>
 <summary>🇬🇧 <strong>English</strong></summary>
 
@@ -222,5 +250,33 @@ This toolset is designed to provide technical guarantees that support the legal 
 * **Never publish/share your private key** under any context. Guard it with your life!
 * **All processed documents** and generated files **should be published together**. Without all of them, the chain of trust is broken.
 * **Never modify** the generated files in any way. Changing a single bit will cause validations to fail. If you need to modify something, **repeat the entire process** and replace the new generated files with the old ones.
+
+---
+
+## 🤝 Contributing
+
+[Contributions are welcome!](./CONTRIBUTING.md)
+Keep code **modular, readable, and tested**.
+Pull requests should include a clear description and working example.
+
+---
+
+## 📝 License
+
+MIT © 2026 [sandokan.cat](https://sandokan.cat)
+
+> *Use it. Modify it. Share it. Attribution is appreciated.*
+
+<div align="center">
+    <a href="./LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+    </a>
+</div>
+
+---
+
+## ⚠️ Disclaimer
+
+All tools and utilities in this repo are provided "as is", without warranties. Use at your own risk. Intended for **personal**, **educational**, and **professional** use.
 
 </details>
