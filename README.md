@@ -269,7 +269,7 @@ MIT © 2026 [sandokan.cat](https://sandokan.cat)
 
 <div align="center">
     <a href="./LICENSE">
-        <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+        <img src="https://img.shields.io/badge/license-MIT-green?logo=opensourceinitiative&logoColor=white" alt="MIT License">
     </a>
 </div>
 
