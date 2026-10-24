@@ -126,7 +126,7 @@ MIT © 2026 [sandokan.cat](https://sandokan.cat)
 
 <div align="center">
     <a href="./LICENSE">
-        <img src="https://img.shields.io/badge/License-MIT-3DA639?style=flat-square&logo=opensourceinitiative&logoColor=ffffff&labelColor=545454&label=Licencia" alt="Licencia MIT">
+        <img src="https://img.shields.io/github/license/sandokanCat/document-integrity-tools?style=flat-square&logo=opensourceinitiative&logoColor=%23fff&logoSize=auto&label=Licencia&labelColor=%23545454&cacheSeconds=1800" alt="Licencia MIT">
     </a>
 </div>
 
@@ -269,7 +269,7 @@ MIT © 2026 [sandokan.cat](https://sandokan.cat)
 
 <div align="center">
     <a href="./LICENSE">
-        <img src="https://img.shields.io/badge/License-MIT-3DA639?style=flat-square&logo=opensourceinitiative&logoColor=ffffff&labelColor=545454" alt="MIT License">
+        <img src="https://img.shields.io/github/license/sandokanCat/document-integrity-tools?style=flat-square&logo=opensourceinitiative&logoColor=%23fff&logoSize=auto&label=License&labelColor=%23545454&cacheSeconds=1800" alt="MIT License">
     </a>
 </div>
 
